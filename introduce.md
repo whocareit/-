@@ -81,6 +81,136 @@ const obj = new FactoryPatternDemo();
 console.log(obj.getResult())
 ```
 ### 抽象工作模式
+是围绕一个超级工厂创建其他工厂。该超级工厂又称为其他工厂的工厂。这种类型的设计模式属于创建型模式，提供了一种创建对象的最佳方式。
+* 意图：提供一个创建一系列相关或相互依赖对象的接口，而无需指定它们具体的类
+* 主要解决：接口选择问题
+* 如何使用：系统的产品有多余一个的产品族，而系统只消费其中某一族的产品。
+* 如何解决：在一个产品族里面，定义多个产品
+* 关键代码：在一个工厂里聚合多个同类的产品
+* 应用实例：工作了，为了参加一些聚会，肯定有两套或者以上的衣服，比如有商务套、时尚套，甚至对于一个家庭来说，可能有商务女装、男装，时尚女装、男装都是成套的，即一系列产品。假设一种情况，在你家中，某一个衣柜只能存放一种这样的衣服，每次拿这种成套的衣服时也自然要从这个衣柜中去取出。用OOP的思想去理解，所有的衣柜(具体工厂)都是衣柜类(抽象工厂)的某一个，每一件成套的衣服又包括具体的上衣(某一具体产品)，裤子(某一具体产品)，这些具体的上衣其实也都是上衣(抽象产品)，具体的裤子也都是裤子(某一具体产品)，这些具体的上衣其实也都是上衣(抽象产品)，具体的裤子也都是裤子(另一个抽象产品)
+* 优点：当一个产品族中的多个对象都被设计成一起工作时，它能保障客户端始终只使用同一个产品族中的对象
+* 缺点：产品族扩展非常困难，要增加一系列的某一产品，既要在抽象的Creator里加代码，又要在具体的里面加代码
+* 使用场景：1. qq换皮肤，一整套一起换。2. 生成不同操作系统的程序
+* 注意事项：产品族难扩展，产品等级易扩展
+* 实现：首先将创建Shape和Color接口和实现这些接口的实体类。下一步是创建抽象工厂类AbstractFatory。接着定义工厂类ShapeFactory和ColorFactory,这两个工厂类都扩展了AbstactFactory。然后创建一个工厂创造器/生成器类FactoryProducer。AbstractFactoryPatternDemo类使用FactoryProducer来获取Abstractory对象。它将向Abstractory传递形状信息Shape，以便于获取它所需对象的类型。同时它还向Abstractory传递颜色信息color，以便于获取它所需对象的类型
+```
+//1. 为形状创建一个接口
+interface Shape {
+    draw(): void;
+}
+
+//2. 创建实现接口的实体类
+class Square implements Shape {
+    draw():void {
+        console.log('Inside Square::draw() method.');
+    }
+}
+
+class Cirlce implements Shape {
+    draw():void {
+        console.log("Inside Circle::draw() method.")
+    }
+}
+
+//3. 为颜色创建一个接口
+interface Color {
+    fill():void;
+}
+
+//4. 创建实现接口的实体类
+class Red implements Color {
+    fill(): void {
+        console.log("Inside Red::draw() method.")
+    }
+}
+
+class Green implements Color {
+    fill(): void {
+        console.log("Inside Green::draw() method.")
+    }
+}
+
+class Blue implements Color {
+    fill(): void {
+        console.log("Inside Blue::draw() method.")
+    }
+}
+
+//5. 为Color和Shape对象创建抽象类来获取工厂
+abstract class AbstractFactory {
+    abstract getColor(color: string): Color | null;
+    abstract getShape(shape: string): Shape | null;
+}
+
+//6. 创建扩展AbstractFactory的工厂类，基于给定的信息生成实体类的对象
+class ShapeFactory extends AbstractFactory {
+    getShape(shapeType: string): Shape | null {
+        if(shapeType === "CIRCLE") {
+            return new Cirlce();
+        }else if(shapeType === "SUQARE") {
+            return new Square();
+        }
+        return null;
+    }
+
+    getColor(color: string): Color | null {
+        return null
+    }
+}
+
+class ColorFactory extends AbstractFactory {
+    getShape(shapetype: string): Shape | null {
+        return null;
+    }
+
+    getColor(color: string): Color | null {
+        if(color === "RED"){
+            return new Red();
+        }else if(color === "GREEN") {
+            return new Green();
+        }else if(color === "blue") {
+            return new Blue();
+        }
+        return null;
+    }
+}
+
+//7. 创建一个工厂创造器/生成器，通过传递形状或颜色信息来获取工厂
+class FactoryProducer {
+    getFactory(choice: string): AbstractFactory | null{
+        if(choice === "SHAPE") {
+            return new ShapeFactory();
+        }else if(choice === "COLOR") {
+            return new ColorFactory();
+        }
+        return null;
+    }
+}
+
+//8. 使用FactoryProducer来获取AbstractFactory,通过传递类型来获取实体类的对象
+class AbstractFactoryDemo {
+    shapeFactory = new FactoryProducer();
+    getResult():void {
+        const shape1 = this.shapeFactory.getFactory("SHAPE");
+        console.log(shape1?.getColor(''));
+        console.log(shape1?.getShape("CIRCLE")?.draw());
+        const shape2 = this.shapeFactory.getFactory("SHAPE");
+        console.log(shape2?.getColor(''));
+        console.log(shape2?.getShape("SUQARE")?.draw());
+        const shape3 = this.shapeFactory.getFactory("COLOR");
+        console.log(shape3?.getColor("RED")?.fill());
+        console.log(shape3?.getShape(""));
+        const shape4 = this.shapeFactory.getFactory("COLOR");
+        console.log(shape4?.getColor("BLUE")?.fill());
+        console.log(shape4?.getShape(""));
+        const shape5 = this.shapeFactory.getFactory("COLOR");
+        console.log(shape5?.getColor("GREEN")?.fill());
+        console.log(shape5?.getShape(""));
+    }
+}
+const demo = new AbstractFactoryDemo();
+demo.getResult();
+```
 
 ### 单例模式
 ### 建造者模式
